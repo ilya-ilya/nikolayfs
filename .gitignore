@@ -1,6 +1,10 @@
-# filesystem and creds
-creds.json
+# filesystem, creds and vim cache
+*.sw*
+*.json
 nik/
+test.c
+a.out
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
