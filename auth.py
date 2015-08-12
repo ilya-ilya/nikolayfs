@@ -39,7 +39,7 @@ class Auth(object):
 	Sufficienty collection of auth info
 	"""
 	confs = appdirs.user_data_dir(appname=APP_NAME)
-	def __init__(self, creds, first = False):
+	def __init__(self, creds, first=False):
 		if not first and os.path.exists(self.confs):
 			self.getData()
 		else:
@@ -106,7 +106,7 @@ class Auth(object):
 		ans = json.loads(response.text)
 		self.expires = nowTime(response.headers[u"date"]) + ans[u"expires_in"]
 		self.token = ans[u"access_token"]
-		self.tokenType = ans[u"token_type"]
+		self.tokentype = ans[u"token_type"]
 		self.saveData()
 
 	def getData(self):

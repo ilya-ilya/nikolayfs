@@ -8,8 +8,20 @@ import errno
 import auth
 import requests
 import json
+import re
+import datetime
+import time
 
 FILES = "https://www.googleapis.com/drive/v2/files/"
+
+
+def countMode(meta):
+	"""
+	count file mode
+	"""
+	mode = 0
+	if meta["mimeType"].split(".")[-1] == u"folder":
+		mode += 
 
 
 def timeRFC3339(dateStr):
@@ -61,14 +73,33 @@ class Operations(llfuse.Operations):
 	"""
 	Redirector (Broker) of system calls to google
 	"""
-	def __init__(self, first = False):
+	def __init__(self, init=False):
 		super(Operations, self).__init__()
-		self.auth = auth.Auth(u"native.json", first)
+		self.auth = auth.Auth(u"native.json", init)
+
+	def access(self, inode, mode, ctx):
+		print "access(%s, %s, %s)" % (inode, mode, ctx)
+
+	def create(self, inode_parent, name, mode, flags, ctx):
+		print "create(%s, %s, %s, %s, %s)" % (inode_parent, name, mode, flags, ctx)
+
+	def flush(self, fh):
+		print "flush(%s)" % (fh, )
+
+	def forget(self, inode_list):
+		print "forget(%s)" % (inode_list, )
+
+	def fsync(self, fh, datasync):
+		print "fsync(%s, %s)" % (fh, datasync)
+
+	def fsyncdir(self, fh, datasync):
+		print "fsyncdir(%s, %s)" % (fh, datasync)
 
 	def getattr(self, inode):
+		print "getattr(%s)" % (inode, )
 		self.auth.check()
 		sid = inode2id(inode)
-		response = requests.get(FILES + sid, headers = {\
+		response = requests.get(FILES + sid, headers={\
 				u"Authorization" : "%s %s" % (self.auth.tokentype, self.auth.token)\
 			})
 		print response.text
@@ -77,10 +108,8 @@ class Operations(llfuse.Operations):
 		entry.st_ino = inode
 		entry.generation = 0
 		#TODO:modes
-		entry.st_mode = 0440
-		if meta[u"editable"]:
-			entry.st_mode += 0200
-		entry.st_nlink = 1
+		entry.st_mode = countMode(meta)
+		entry.st_nlink = 2
 		entry.st_uid = os.getuid()
 		entry.st_gid = os.getgid()
 		entry.st_rdev = 0
@@ -88,12 +117,25 @@ class Operations(llfuse.Operations):
 		entry.st_blksize = 512
 		entry.st_blocks = 1
 		#entry.st_atime = timeRFC3339(meta.get(u"lastViewedByMeDate"))
-		entry.st_atime = 0
-		entry.st_ctime = 0
-		entry.st_mtime = 0
+		entry.st_atime = 1
+		entry.st_ctime = 1
+		entry.st_mtime = 1
 		entry.attr_timeout = 300
 		entry.entry_timeout = 300
 		return entry
+
+	def getxattr(self, inode, name):
+		print "getxattr(%s, %s)" % (inode, name)
+		raise llfuse.FUSEError(llfuse.ENOATTR)
+
+	def link(self, inode, new_parent_inode, new_name):
+		print "link(%s, %s, %s)" % (inode, new_parent_inode, new_name)
+
+	def listxattr(self, inode):
+		print "listxattr(%s)" % (inode,)
+
+	def lookup(self, parent_inode, name):
+		print "lookup(%s, %s)" % (parent_inode, name)
 
 
 if __name__ == "__main__":
@@ -101,7 +143,7 @@ if __name__ == "__main__":
 	first = False
 	if len(sys.argv) > 2:
 		first = True
-	operations = Operations(first = first)
+	operations = Operations(init=first)
 	llfuse.init(operations, mountpoint, [])
 	llfuse.main()
 	llfuse.close()
