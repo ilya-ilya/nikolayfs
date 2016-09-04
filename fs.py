@@ -20,8 +20,9 @@ def countMode(meta):
 	count file mode
 	"""
 	mode = 0
-	if meta["mimeType"].split(".")[-1] == u"folder":
-		mode += 
+#	if meta["mimeType"].split(".")[-1] == u"folder":
+#		mode += 
+	return 0
 
 
 def timeRFC3339(dateStr):
