@@ -135,5 +135,5 @@ class Auth(object):
 
 
 if __name__ == "__main__":
-	client = Auth(u"native.json")
+	client = Auth(u"native.json", first = False)
 	client.refresh()
